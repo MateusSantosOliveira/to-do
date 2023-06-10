@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lista de Tarefas</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    h1 {
+      text-align: center;
+      margin: 0 0 20px;
+      color: #333;
+    }
+    
+    .input-group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .input-group input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    
+    .input-group button {
+      background-color: #2196F3;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+    
+    h2 {
+      color: #333;
+      font-size: 18px;
+      margin: 0 0 10px;
+    }
+    
+    .task-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .task-list li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #fff;
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .task-list li.completed {
+      background-color: #f0f0f0;
+      text-decoration: line-through;
+    }
+    
+    .task-list li .task-text {
+      flex: 1;
+      margin-right: 10px;
+    }
+    
+    .task-list li button {
+      background-color: transparent;
+      border: none;
+      color: #999;
+      cursor: pointer;
+    }
+    
+    .task-list li button:hover {
+      color: #f44336;
+    }
+    
+    .print-button {
+      text-align: center;
+      margin-top: 20px;
+    }
+    
+    .print-button button {
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    
+    .theme-switch {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 20px;
+    }
+    
+    .theme-switch input[type="checkbox"] {
+      display: none;
+    }
+    
+    .theme-switch label {
+      display: inline-block;
+      width: 40px;
+      height: 20px;
+      background-color: #ccc;
+      border-radius: 10px;
+      position: relative;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    .theme-switch label:before {
+      content: "";
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      background-color: #fff;
+      transition: left 0.3s;
+    }
+    
+    .theme-switch input[type="checkbox"]:checked + label {
+      background-color: #2196F3;
+    }
+    
+    .theme-switch input[type="checkbox"]:checked + label:before {
+      left: calc(100% - 18px);
+    }
+    
+    @media (max-width: 600px) {
+      .container {
+        padding: 10px;
+      }
+      
+      .input-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .input-group input[type="text"] {
+        margin-right: 0;
+        margin-bottom: 10px;
+      }
+      
+      .theme-switch {
+        justify-content: flex-start;
+      }
+    }
+    
+    .dark-theme {
+      background-color: #333;
+      color: #fff;
+    }
+    
+    .dark-theme h1,
+    .dark-theme h2 {
+      color: #fff;
+    }
+    
+    .dark-theme .input-group input[type="text"],
+    .dark-theme .input-group button,
+    .dark-theme .task-list li button,
+    .dark-theme .print-button button {
+      background-color: #555;
+      color: #fff;
+    }
+    
+    .dark-theme .task-list li {
+      background-color: #444;
+    }
+    
+    .dark-theme .task-list li.completed {
+      background-color: #666;
+    }
+    
+    .dark-theme .theme-switch label {
+      background-color: #777;
+    }
+    
+    .dark-theme .theme-switch label:before {
+      background-color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Lista de Tarefas</h1>
+    
+    <div class="input-group">
+      <input type="text" id="taskInput" placeholder="Adicionar nova tarefa">
+      <button onclick="addTask()">Adicionar</button>
+    </div>
+    
+    <h2>Atividades a fazer:</h2>
+    <ul id="todoList" class="task-list"></ul>
+    
+    <h2>Atividades concluídas:</h2>
+    <ul id="completedList" class="task-list"></ul>
+    
+    <div class="print-button">
+      <button onclick="printCompletedTasks()">Imprimir Tarefas Concluídas</button>
+    </div>
+    
+    <div class="theme-switch">
+      <input type="checkbox" id="themeSwitch" onchange="changeTheme()">
+      <label for="themeSwitch"></label>
+    </div>
+  </div>
+  
+  <script>
+    function addTask() {
+      var taskInput = document.getElementById("taskInput");
+      var taskText = taskInput.value;
+      
+      if (taskText === "") {
+        alert("Por favor, insira uma tarefa.");
+        return;
+      }
+      
+      var listItem = document.createElement("li");
+      listItem.innerHTML = `
+        <input type="checkbox" class="task-checkbox" onclick="completeTask(this)">
+        <span class="task-text">${taskText}</span>
+        <button onclick="deleteTask(this)">
+          Excluir
+        </button>
+      `;
+      
+      var todoList = document.getElementById("todoList");
+      todoList.appendChild(listItem);
+      
+      taskInput.value = "";
+    }
+    
+    function completeTask(checkbox) {
+      var listItem = checkbox.parentElement;
+      var completedList = document.getElementById("completedList");
+      
+      if (checkbox.checked) {
+        listItem.classList.add("completed");
+        completedList.appendChild(listItem);
+      } else {
+        listItem.classList.remove("completed");
+        var todoList = document.getElementById("todoList");
+        todoList.appendChild(listItem);
+      }
+    }
+    
+    function deleteTask(button) {
+      var listItem = button.parentElement;
+      listItem.remove();
+    }
+    
+    function printCompletedTasks() {
+      var completedListItems = document.querySelectorAll("#completedList li");
+      
+      if (completedListItems.length === 0) {
+        alert("Não há tarefas concluídas para imprimir.");
+        return;
+      }
+      
+      var printContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Tarefas Concluídas</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              margin: 20px;
+            }
+            
+            h1 {
+              text-align: center;
+              color: #333;
+            }
+            
+            p {
+              margin-bottom: 10px;
+            }
+          </style>
+        </head>
+        <body>
+          <h1>Tarefas Concluídas</h1>
+      `;
+      
+      completedListItems.forEach(function(item) {
+        var taskText = item.querySelector(".task-text").textContent;
+        printContent += "<p>" + taskText + "</p>";
+      });
+      
+      printContent += `
+        </body>
+        </html>
+      `;
+      
+      var printWindow = window.open("", "_blank");
+      printWindow.document.open();
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      printWindow.print();
+    }
+    
+    function changeTheme() {
+      var body = document.body;
+      var themeSwitch = document.getElementById("themeSwitch");
+      
+      if (themeSwitch.checked) {
+        body.classList.add("dark-theme");
+      } else {
+        body.classList.remove("dark-theme");
+      }
+    }
+  </script>
+</body>
+</html>
